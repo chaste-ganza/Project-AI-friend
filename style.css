@@ -1,0 +1,105 @@
+body{
+    background-color: #0B0D1B;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 97vh;
+}
+
+.container{
+    width: 60vh;
+    height: 70vh;
+    display: flex;
+    background-color: #3ebfff;
+    padding: 8vh;
+    border-radius: 40px;
+    flex-wrap: wrap;
+}
+
+.eye_container{
+    background-color: rgba(255, 255, 255, 0);
+    width: 100vh;
+    height: 35vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.eye{
+    height: 100%;
+    width: 25vh;
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+}
+
+.eyelid{
+    height: 0%;
+    width: 18vh;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    background-color: #3ebfff;
+    margin-top: auto;
+    transition: 0.3s;
+}
+
+
+.mouth_container{
+    width: 100%;
+    height: 30vh;
+    background-color: rgba(0, 255, 255, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mouth{
+    width: 80%;
+    height: 26vh;
+    background-color: rgb(255, 255, 255);
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius:50%;
+    border-bottom-right-radius: 50%;
+    transition: 0.2s;
+}
+
+
+
+.button_container{
+    background-color: red;
+    padding: 20px;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 30px;
+    background-color: #0d165e;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    border: 2px white solid;
+}
+
+.mouth_buttons{
+    background-color: #3ebfff;
+    border: 2px white solid;
+    border-radius: 20px;
+    height: 50px;
+    font-size: larger;
+    color: white;
+    width: 30%;
+    transition: 0.4s;
+}
+
+.mouth_buttons:hover{
+    transform: translateY(-3px);
+    background-color: white;
+    color: #3ebfff;
+}
+
+
+
+
