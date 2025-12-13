@@ -64,6 +64,19 @@ body{
     border-bottom-left-radius:50%;
     border-bottom-right-radius: 50%;
     transition: 0.2s;
+    display: flex;
+    justify-content: center;
+    
+}
+
+
+.lip{
+    height: 80%;
+    width: 39vh;
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    background-color: #3ebfff;
+    transition: 0.3s;
 }
 
 

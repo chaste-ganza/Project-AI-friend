@@ -30,6 +30,7 @@ blink();
 
 
 sad.addEventListener("click", ()=>{
+  blink();
     mouth.style.borderTopRightRadius= "50%";
     mouth.style.borderTopLeftRadius= "50%";
     mouth.style.borderBottomLeftRadius= "5px";
@@ -42,6 +43,7 @@ sad.addEventListener("click", ()=>{
 })
 
 grin.addEventListener("click", ()=>{
+  blink();
   mouth.style.borderTopRightRadius= "5px";
     mouth.style.borderTopLeftRadius= "5px";
     mouth.style.borderBottomLeftRadius= "50%";
@@ -54,6 +56,7 @@ grin.addEventListener("click", ()=>{
 })
 
 surprise.addEventListener("click", ()=>{
+  blink();
   mouth.style.borderRadius= "50%";
   mouth.style.width= "26vh";
   left_eyelid.style.height = "0%";
