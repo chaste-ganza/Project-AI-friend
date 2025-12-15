@@ -57,12 +57,9 @@ body{
 
 .mouth{
     width: 80%;
-    height: 26vh;
+    height: 20vh;
     background-color: rgb(255, 255, 255);
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius:50%;
-    border-bottom-right-radius: 50%;
+    border-radius: 5px 5px 500% 500%;
     transition: 0.2s;
     display: flex;
     justify-content: center;
@@ -71,10 +68,9 @@ body{
 
 
 .lip{
-    height: 80%;
-    width: 39vh;
-    border-bottom-left-radius: 50%;
-    border-bottom-right-radius: 50%;
+    height: 60%;
+    width: 70%;
+    border-radius: 0px 0px 100% 100%;
     background-color: #3ebfff;
     transition: 0.3s;
 }

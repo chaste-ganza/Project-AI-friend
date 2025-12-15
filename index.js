@@ -28,16 +28,42 @@ function blink() {
       right_eye.style.height = "100%"; 
     }, 200);
 
-  }, 3000);
+  }, 2000);
+  
 }
+
+
+function mouthOpenSmall() {
+  mouth.style.borderRadius= "50%";
+  mouth.style.width= "20vh";
+  mouth.style.height = "20vh";
+  upper_lip.style.height = "0%";
+}
+
+
+function mouthOpenMedium() {
+  mouth.style.borderRadius= "30%";
+  mouth.style.width= "25vh";
+  mouth.style.height = "25vh";
+  upper_lip.style.height = "0%";
+}
+
+
+function mouthOpenWide() {
+  mouth.style.borderRadius= "20%";
+  mouth.style.width= "40vh";
+  mouth.style.height = "20vh";
+  upper_lip.style.height = "0%";
+};
+
+
+
+
+
 blink();
 
 sad.addEventListener("click", ()=>{
-  blink();
-    mouth.style.borderTopRightRadius= "50%";
-    mouth.style.borderTopLeftRadius= "50%";
-    mouth.style.borderBottomLeftRadius= "5px";
-    mouth.style.borderBottomRightRadius= "5px";
+    mouth.style.borderRadius = "50% 50% 5px 5px";
     mouth.style.width= "80%";
     left_eyelid.style.height = "0%";
     right_eyelid.style.height = "0%";
@@ -47,10 +73,7 @@ sad.addEventListener("click", ()=>{
 })
 
 grin.addEventListener("click", ()=>{
-  mouth.style.borderTopRightRadius= "5px";
-    mouth.style.borderTopLeftRadius= "5px";
-    mouth.style.borderBottomLeftRadius= "50%";
-    mouth.style.borderBottomRightRadius= "50%";
+    mouth.style.borderRadius = "5px 5px 50% 50%";
     mouth.style.width= "80%";
     left_eyelid.style.height = "0%";
     right_eyelid.style.height = "0%";
@@ -71,10 +94,7 @@ surprise.addEventListener("click", ()=>{
 
 
 smile.addEventListener("click", ()=>{
-  mouth.style.borderTopRightRadius= "5px";
-    mouth.style.borderTopLeftRadius= "5px";
-    mouth.style.borderBottomLeftRadius= "50px";
-    mouth.style.borderBottomRightRadius= "50px";
+  mouth.style.borderRadius = "5px 5px 50% 50%";
     mouth.style.width= "80%";
     left_eyelid.style.height = "85%";
     right_eyelid.style.height = "85%";
@@ -84,10 +104,7 @@ smile.addEventListener("click", ()=>{
 })
 
 happy.addEventListener("click", ()=>{
-  mouth.style.borderTopRightRadius= "5px";
-    mouth.style.borderTopLeftRadius= "5px";
-    mouth.style.borderBottomLeftRadius= "50%";
-    mouth.style.borderBottomRightRadius= "50%";
+  mouth.style.borderRadius = "5px 5px 50% 50%";
     mouth.style.width= "80%";
     left_eyelid.style.height = "80%";
     right_eyelid.style.height = "80%";
@@ -97,20 +114,5 @@ happy.addEventListener("click", ()=>{
 })
 
 
-wink.addEventListener("click", ()=>{
-  mouth.style.borderTopRightRadius= "5px";
-    mouth.style.borderTopLeftRadius= "5px";
-    mouth.style.borderBottomLeftRadius= "50%";
-    mouth.style.borderBottomRightRadius= "50%";
-    mouth.style.width= "80%";
-    left_eyelid.style.height = "0%";
-    right_eyelid.style.height = "0%";
-    left_eye.style.height = "90%";
-    right_eye.style.height = "90%";
-    upper_lip.style.height = "0%";
-    setTimeout(() => {
-      left_eye.style.height = "100%";
-      right_eye.style.height = "100%"; 
-    }, 200);
 
-})
+
