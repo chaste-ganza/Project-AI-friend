@@ -46,3 +46,29 @@ The transcript should appear below the button within ~5 seconds
 8. Wait for PAL's reply to appear (~1-2 seconds more)
 9. PAL should comment on the filler words ("uh", "you know")
 10. Click "Start speaking" again and continue — PAL should remember what you said before
+
+## Testing TTS
+
+Browser voice, no ElevenLabs key needed:
+
+1. Start backend and frontend as normal
+2. Speak into the mic, stop recording
+3. Wait for transcript and PAL reply to appear
+4. PAL should speak its reply automatically using browser voice
+5. The mic button should be disabled while PAL speaks
+6. After PAL finishes, the mic button re-enables
+
+ElevenLabs voice:
+
+1. Add `ELEVENLABS_API_KEY` to `.env`
+2. Restart the backend
+3. Repeat the test above
+4. PAL's voice should sound significantly more natural
+5. Check the Python console — it should log "Using ElevenLabs TTS"
+
+Fallback:
+
+1. Set `ELEVENLABS_API_KEY` to an invalid value in `.env`
+2. Restart the backend
+3. PAL should still speak — using browser TTS as fallback
+4. No error should appear in the browser console

@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import MicButton from './components/MicButton'
+import useTTS from './hooks/useTTS'
 import heroImg from './assets/hero.png'
 import './App.css'
 
-// Renders the PAL speech coach and coordinates transcription requests.
+// Renders the PAL speech coach and coordinates transcription, replies, and speech.
 function App() {
   const [transcript, setTranscript] = useState('')
   const [palReply, setPalReply] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [isPalThinking, setIsPalThinking] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const { speak, isSpeaking } = useTTS()
 
-  // Uploads the completed audio recording and stores the returned transcript.
+  // Uploads the completed audio recording and asks PAL to respond to the transcript.
   async function handleAudioReady(blob) {
     setIsTranscribing(true)
     setTranscript('')
@@ -49,9 +52,21 @@ function App() {
         }
 
         const palData = await palResponse.json()
-        setPalReply(palData.reply)
+        const reply = palData.reply
+        setPalReply(reply)
+        setIsPalThinking(false)
+
+        if (!isMuted) {
+          speak(reply)
+        }
       } catch {
-        setPalReply("I didn't catch that — try again.")
+        const fallbackReply = "I didn't catch that - try again."
+        setPalReply(fallbackReply)
+        setIsPalThinking(false)
+
+        if (!isMuted) {
+          speak(fallbackReply)
+        }
       }
     } catch {
       setTranscript('Sorry, PAL could not transcribe that audio.')
@@ -73,6 +88,11 @@ function App() {
     }
   }
 
+  // Toggles whether PAL should speak replies aloud automatically.
+  function handleMuteToggle() {
+    setIsMuted((currentValue) => !currentValue)
+  }
+
   return (
     <>
       <section id="center">
@@ -89,7 +109,10 @@ function App() {
           palReply={palReply}
           isTranscribing={isTranscribing}
           isPalThinking={isPalThinking}
+          isSpeaking={isSpeaking}
+          isMuted={isMuted}
           onNewSession={handleNewSession}
+          onMuteToggle={handleMuteToggle}
         />
       </section>
     </>

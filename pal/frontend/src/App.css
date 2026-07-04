@@ -65,6 +65,12 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+.mic-button.disabled {
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.12);
+  cursor: not-allowed;
+}
+
 .recording-dot {
   width: 10px;
   height: 10px;
@@ -104,6 +110,28 @@
   text-align: left;
 }
 
+.speaking-indicator {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.speaking-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: sound-wave 0.9s infinite ease-in-out;
+}
+
+.speaking-indicator span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.speaking-indicator span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
 .session-button {
   min-height: 38px;
   padding: 8px 14px;
@@ -134,5 +162,18 @@
   50% {
     opacity: 0.45;
     transform: scale(1.4);
+  }
+}
+
+@keyframes sound-wave {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-5px);
   }
 }

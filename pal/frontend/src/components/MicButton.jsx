@@ -7,7 +7,10 @@ function MicButton({
   palReply,
   isTranscribing,
   isPalThinking,
+  isSpeaking,
+  isMuted,
   onNewSession,
+  onMuteToggle,
 }) {
   const { startRecording, stopRecording, error, isRecording } = useMicrophone()
 
@@ -28,11 +31,18 @@ function MicButton({
     <div className="mic-panel">
       <button
         type="button"
-        className={isRecording ? 'mic-button recording' : 'mic-button'}
+        className={
+          isRecording
+            ? 'mic-button recording'
+            : isSpeaking
+              ? 'mic-button disabled'
+              : 'mic-button'
+        }
         onClick={handleClick}
+        disabled={isSpeaking}
       >
         {isRecording && <span className="recording-dot" aria-hidden="true" />}
-        {isRecording ? 'Stop' : 'Start speaking'}
+        {isSpeaking ? 'PAL is speaking...' : isRecording ? 'Stop' : 'Start speaking'}
       </button>
 
       {error && (
@@ -55,8 +65,19 @@ function MicButton({
           <p>
             <strong>PAL:</strong> {isPalThinking ? 'PAL is thinking...' : palReply}
           </p>
+          {isSpeaking && (
+            <span className="speaking-indicator" aria-label="PAL is speaking">
+              <span />
+              <span />
+              <span />
+            </span>
+          )}
         </div>
       )}
+
+      <button type="button" className="session-button" onClick={onMuteToggle}>
+        {isMuted ? 'Unmute PAL' : 'Mute PAL'}
+      </button>
 
       <button type="button" className="session-button" onClick={onNewSession}>
         Start new session
