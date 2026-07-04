@@ -33,3 +33,16 @@ Test transcription works:
 Open http://localhost:5173
 Click "Start speaking", speak for a few seconds, click "Stop"
 The transcript should appear below the button within ~5 seconds
+
+## Testing PAL responses
+
+1. Start the backend: `uvicorn main:app --reload --port 8000`
+2. Start the frontend: `npm run dev`
+3. Open http://localhost:5173
+4. Click "Start speaking"
+5. Say: "Today I want to talk about the importance of uh, you know, communication in teams"
+6. Click "Stop"
+7. Wait for transcript to appear (~3-5 seconds)
+8. Wait for PAL's reply to appear (~1-2 seconds more)
+9. PAL should comment on the filler words ("uh", "you know")
+10. Click "Start speaking" again and continue — PAL should remember what you said before

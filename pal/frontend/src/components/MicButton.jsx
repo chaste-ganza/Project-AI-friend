@@ -1,7 +1,14 @@
 import useMicrophone from '../hooks/useMicrophone'
 
 // Renders the microphone controls and sends completed recordings upward.
-function MicButton({ onAudioReady, transcript, isTranscribing }) {
+function MicButton({
+  onAudioReady,
+  transcript,
+  palReply,
+  isTranscribing,
+  isPalThinking,
+  onNewSession,
+}) {
   const { startRecording, stopRecording, error, isRecording } = useMicrophone()
 
   // Toggles recording and forwards the stopped audio Blob to the app.
@@ -42,6 +49,18 @@ function MicButton({ onAudioReady, transcript, isTranscribing }) {
           <p>{transcript}</p>
         </div>
       )}
+
+      {(isPalThinking || palReply) && (
+        <div className="pal-reply-box">
+          <p>
+            <strong>PAL:</strong> {isPalThinking ? 'PAL is thinking...' : palReply}
+          </p>
+        </div>
+      )}
+
+      <button type="button" className="session-button" onClick={onNewSession}>
+        Start new session
+      </button>
     </div>
   )
 }
