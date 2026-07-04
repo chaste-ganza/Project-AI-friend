@@ -1,0 +1,74 @@
+
+<style>
+  .tree { padding: 1rem 0; font-family: var(--font-mono); font-size: 13px; }
+  .row { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; cursor: default; border-radius: 6px; transition: background 0.1s; }
+  .row:hover { background: var(--surface-1); }
+  .indent { color: var(--border-strong); user-select: none; white-space: pre; }
+  .name { color: var(--text-primary); white-space: nowrap; }
+  .name.folder { font-weight: 500; }
+  .name.file { color: var(--text-secondary); }
+  .tag { font-size: 11px; padding: 1px 7px; border-radius: 20px; border: 0.5px solid var(--border); color: var(--text-muted); background: var(--surface-2); white-space: nowrap; font-family: var(--font-sans); }
+  .tag.core { border-color: var(--border-accent); color: var(--text-accent); background: var(--bg-accent); }
+  .tag.face { border-color: var(--border-success); color: var(--text-success); background: var(--bg-success); }
+  .tag.ai { border-color: var(--border-warning); color: var(--text-warning); background: var(--bg-warning); }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 12px 0 8px; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 0 4px; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); font-family: var(--font-sans); }
+</style>
+<div class="tree">
+  <div class="row"><span class="indent"></span><span class="name folder">pal/</span></div>
+
+  <div class="row"><span class="indent">  ├── </span><span class="name folder">frontend/</span><span class="tag">React + Vite app</span></div>
+
+  <div class="row"><span class="indent">  │   ├── </span><span class="name folder">src/</span></div>
+
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name folder">components/</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">PalFace.jsx</span><span class="tag face">PAL's animated face</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">MicButton.jsx</span><span class="tag core">start / stop mic</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">SessionReport.jsx</span><span class="tag">end-of-session feedback</span></div>
+  <div class="row"><span class="indent">  │   │   │   └── </span><span class="name file">LiveStats.jsx</span><span class="tag">pace, filler word counter</span></div>
+
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name folder">hooks/</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">useMicrophone.js</span><span class="tag core">capture mic audio</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">useCamera.js</span><span class="tag">webcam access (Layer 2)</span></div>
+  <div class="row"><span class="indent">  │   │   │   └── </span><span class="name file">usePalSocket.js</span><span class="tag core">talk to backend</span></div>
+
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name folder">lib/</span></div>
+  <div class="row"><span class="indent">  │   │   │   ├── </span><span class="name file">fillerWords.js</span><span class="tag">detect um, uh, like...</span></div>
+  <div class="row"><span class="indent">  │   │   │   └── </span><span class="name file">palExpressions.js</span><span class="tag face">maps signals → face state</span></div>
+
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">App.jsx</span><span class="tag core">main screen</span></div>
+  <div class="row"><span class="indent">  │   │   └── </span><span class="name file">main.jsx</span><span class="tag">entry point</span></div>
+
+  <div class="row"><span class="indent">  │   ├── </span><span class="name file">index.html</span></div>
+  <div class="row"><span class="indent">  │   ├── </span><span class="name file">vite.config.js</span></div>
+  <div class="row"><span class="indent">  │   └── </span><span class="name file">package.json</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="indent">  ├── </span><span class="name folder">backend/</span><span class="tag">Python + FastAPI</span></div>
+
+  <div class="row"><span class="indent">  │   ├── </span><span class="name folder">routes/</span></div>
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">transcribe.py</span><span class="tag core">audio → text via Whisper</span></div>
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">respond.py</span><span class="tag ai">text → PAL reply via Groq</span></div>
+  <div class="row"><span class="indent">  │   │   └── </span><span class="name file">speak.py</span><span class="tag ai">text → voice via TTS</span></div>
+
+  <div class="row"><span class="indent">  │   ├── </span><span class="name folder">services/</span></div>
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">whisper_service.py</span><span class="tag core">runs Whisper model</span></div>
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">groq_service.py</span><span class="tag ai">calls Groq API</span></div>
+  <div class="row"><span class="indent">  │   │   ├── </span><span class="name file">tts_service.py</span><span class="tag ai">calls ElevenLabs / browser</span></div>
+  <div class="row"><span class="indent">  │   │   └── </span><span class="name file">session_service.py</span><span class="tag">tracks session history</span></div>
+
+  <div class="row"><span class="indent">  │   ├── </span><span class="name file">main.py</span><span class="tag core">FastAPI app entry</span></div>
+  <div class="row"><span class="indent">  │   ├── </span><span class="name file">config.py</span><span class="tag">API keys, settings</span></div>
+  <div class="row"><span class="indent">  │   └── </span><span class="name file">requirements.txt</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="indent">  ├── </span><span class="name file">.env</span><span class="tag">GROQ_API_KEY, ELEVENLABS_KEY</span></div>
+  <div class="row"><span class="indent">  ├── </span><span class="name file">.gitignore</span><span class="tag">keeps secrets out of git</span></div>
+  <div class="row"><span class="indent">  └── </span><span class="name file">README.md</span></div>
+
+  <div class="divider"></div>
+  <div class="legend">
+    <div class="leg-item"><span class="tag core">core</span> build this first</div>
+    <div class="leg-item"><span class="tag face">face</span> PAL's personality</div>
+    <div class="leg-item"><span class="tag ai">ai</span> connects to AI services</div>
+  </div>
+</div>

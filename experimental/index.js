@@ -60,6 +60,7 @@ function mouthOpenWide() {
 
 
 
+
 blink();
 
 sad.addEventListener("click", ()=>{

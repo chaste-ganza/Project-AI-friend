@@ -14,6 +14,7 @@ body{
     padding: 8vh;
     border-radius: 40px;
     flex-wrap: wrap;
+    box-shadow: white 0 0 2px;
 }
 
 .eye_container{
@@ -32,7 +33,7 @@ body{
     border-radius: 20px;
     transition: 0.3s;
     display: flex;
-    justify-content: center;
+    justify-content: center; 
 }
 
 .eyelid{
