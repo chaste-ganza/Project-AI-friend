@@ -1,42 +1,50 @@
-import { useState } from 'react'
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000'
+import { useEffect, useRef, useState } from 'react'
 import MicButton from './components/MicButton'
-import useTTS from './hooks/useTTS'
 import PalFace from './components/PalFace'
+import useConverse from './hooks/useConverse'
 import { getExpressionFromAppState } from './lib/palExpressions'
 import './App.css'
 
-// Renders the PAL speech coach and coordinates transcription, replies, and speech.
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000'
+
+// Renders the PAL speech coach and coordinates transcription, streaming reply, and speech.
 function App() {
   const [transcript, setTranscript] = useState('')
-  const [palReply, setPalReply] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const [isPalThinking, setIsPalThinking] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [overrideExpression, setOverrideExpression] = useState(null)
-  const { speak, isSpeaking } = useTTS()
+  const overrideTimerRef = useRef(null)
 
-  function detectToneFromReply(replyText) {
-    const lower = replyText.toLowerCase()
-    const pleasedWords = ['good', 'great', 'well done', 'strong', 'excellent', 'nice']
-    const concernedWords = ['watch', 'careful', 'too many', 'filler', 'slow', 'avoid', 'losing']
+  const {
+    converse,
+    cancelConverse,
+    palReply,
+    isPalThinking,
+    isStreaming,
+    isSpeaking,
+    error: converseError,
+    onExpression,
+  } = useConverse()
 
-    if (pleasedWords.some(w => lower.includes(w))) {
-      setOverrideExpression('pleased')
-      setTimeout(() => setOverrideExpression(null), 3000)
-    } else if (concernedWords.some(w => lower.includes(w))) {
-      setOverrideExpression('concerned')
-      setTimeout(() => setOverrideExpression(null), 3000)
+  // Wire up expression events from the WebSocket stream.
+  useEffect(() => {
+    onExpression.current = (expr) => {
+      if (expr === 'idle') return          // don't override with neutral
+      clearTimeout(overrideTimerRef.current)
+      setOverrideExpression(expr)
+      overrideTimerRef.current = setTimeout(() => setOverrideExpression(null), 3000)
     }
-  }
+    return () => {
+      onExpression.current = null
+      clearTimeout(overrideTimerRef.current)
+    }
+  }, [onExpression])
 
-  // Uploads the completed audio recording and asks PAL to respond to the transcript.
+  // Uploads the completed audio recording, transcribes it, then starts the WS stream.
   async function handleAudioReady(blob) {
     setIsTranscribing(true)
     setTranscript('')
-    setPalReply('')
 
     try {
       const formData = new FormData()
@@ -47,74 +55,39 @@ function App() {
         body: formData,
       })
 
-      if (!response.ok) {
-        throw new Error('Transcription request failed')
-      }
+      if (!response.ok) throw new Error('Transcription request failed')
 
       const data = await response.json()
       const transcriptText = data.transcript
       setTranscript(transcriptText)
       setIsTranscribing(false)
-      setIsPalThinking(true)
 
-      try {
-        const palResponse = await fetch(`${BACKEND_URL}/respond`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ transcript: transcriptText }),
-        })
-
-        if (!palResponse.ok) {
-          throw new Error('PAL response request failed')
-        }
-
-        const palData = await palResponse.json()
-        const reply = palData.reply
-        setPalReply(reply)
-        setIsPalThinking(false)
-        detectToneFromReply(reply)
-
-        if (!isMuted) {
-          speak(reply)
-        }
-      } catch {
-        const fallbackReply = "I didn't catch that - try again."
-        setPalReply(fallbackReply)
-        setIsPalThinking(false)
-
-        if (!isMuted) {
-          speak(fallbackReply)
-        }
-      }
+      // Hand off to the streaming WebSocket pipeline.
+      await converse(transcriptText, isMuted)
     } catch {
       setTranscript('Sorry, PAL could not transcribe that audio.')
-    } finally {
       setIsTranscribing(false)
-      setIsPalThinking(false)
     }
   }
 
-  // Clears backend session memory and resets the visible conversation.
+  // Clears backend session memory, cancels any in-flight stream, and resets UI.
   async function handleNewSession() {
+    cancelConverse()
     try {
-      await fetch(`${BACKEND_URL}/session/reset`, {
-        method: 'POST',
-      })
+      await fetch(`${BACKEND_URL}/session/reset`, { method: 'POST' })
     } finally {
       setTranscript('')
-      setPalReply('')
     }
   }
 
-  // Toggles whether PAL should speak replies aloud automatically.
   function handleMuteToggle() {
-    setIsMuted((currentValue) => !currentValue)
+    setIsMuted(v => !v)
   }
 
-  const baseExpression = getExpressionFromAppState(isRecording, isTranscribing, isPalThinking, isSpeaking)
-  const expression = overrideExpression || baseExpression
+  const baseExpression = getExpressionFromAppState(
+    isRecording, isTranscribing, isPalThinking, isSpeaking, isStreaming,
+  )
+  const expression = overrideExpression ?? baseExpression
 
   return (
     <>
@@ -134,7 +107,9 @@ function App() {
           isTranscribing={isTranscribing}
           isPalThinking={isPalThinking}
           isSpeaking={isSpeaking}
+          isStreaming={isStreaming}
           isMuted={isMuted}
+          converseError={converseError}
           onNewSession={handleNewSession}
           onMuteToggle={handleMuteToggle}
         />

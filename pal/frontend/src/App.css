@@ -65,6 +65,19 @@
   cursor: not-allowed;
 }
 
+/* Streaming / thinking state — PAL is generating a reply */
+.mic-button.streaming {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+  cursor: not-allowed;
+  animation: streaming-pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes streaming-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
 .recording-dot {
   width: 10px;
   height: 10px;

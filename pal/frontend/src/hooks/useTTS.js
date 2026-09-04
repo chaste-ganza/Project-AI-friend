@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000'
+
 // Speaks PAL replies by trying backend audio first, then falling back to browser TTS.
+// NOTE: This hook is retained for the /speak rollback path only.
+// The active streaming path uses useConverse instead.
 function useTTS() {
   const [isSpeaking, setIsSpeaking] = useState(false)
 
@@ -49,7 +53,7 @@ function useTTS() {
     setIsSpeaking(true)
 
     try {
-      const response = await fetch('http://localhost:8000/speak', {
+      const response = await fetch(`${BACKEND_URL}/speak`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

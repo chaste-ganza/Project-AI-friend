@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from routes.converse import router as converse_router
 from routes.respond import router as respond_router
 from routes.speak import router as speak_router
 from routes.transcribe import router as transcribe_router
@@ -21,6 +22,7 @@ app.add_middleware(
 app.include_router(transcribe_router)
 app.include_router(respond_router)
 app.include_router(speak_router)
+app.include_router(converse_router)
 
 
 # Reports whether the API server is running.

@@ -9,12 +9,14 @@ function MicButton({
   isTranscribing,
   isPalThinking,
   isSpeaking,
+  isStreaming,
   isMuted,
+  converseError,
   onNewSession,
   onMuteToggle,
   onRecordingChange,
 }) {
-  const { startRecording, stopRecording, error, isRecording } = useMicrophone()
+  const { startRecording, stopRecording, error: micError, isRecording } = useMicrophone()
 
   useEffect(() => {
     if (onRecordingChange) onRecordingChange(isRecording)
@@ -24,37 +26,47 @@ function MicButton({
   async function handleClick() {
     if (isRecording) {
       const blob = await stopRecording()
-      if (blob) {
-        onAudioReady(blob)
-      }
+      if (blob) onAudioReady(blob)
       return
     }
-
     await startRecording()
+  }
+
+  // Button is disabled while PAL is speaking, streaming, or thinking.
+  const isDisabled = isSpeaking || isStreaming || isPalThinking
+
+  function buttonClass() {
+    if (isRecording) return 'mic-button recording'
+    if (isSpeaking) return 'mic-button disabled'
+    if (isStreaming || isPalThinking) return 'mic-button streaming'
+    return 'mic-button'
+  }
+
+  function buttonLabel() {
+    if (isSpeaking) return 'PAL is speaking...'
+    if (isStreaming) return 'PAL is responding...'
+    if (isPalThinking) return 'PAL is thinking...'
+    if (isRecording) return 'Stop'
+    return 'Start speaking'
   }
 
   return (
     <div className="mic-panel">
       <button
         type="button"
-        className={
-          isRecording
-            ? 'mic-button recording'
-            : isSpeaking
-              ? 'mic-button disabled'
-              : 'mic-button'
-        }
+        className={buttonClass()}
         onClick={handleClick}
-        disabled={isSpeaking}
+        disabled={isDisabled}
       >
         {isRecording && <span className="recording-dot" aria-hidden="true" />}
-        {isSpeaking ? 'PAL is speaking...' : isRecording ? 'Stop' : 'Start speaking'}
+        {buttonLabel()}
       </button>
 
-      {error && (
+      {(micError || converseError) && (
         <p className="mic-error">
-          Microphone access denied. Please allow microphone access in your
-          browser.
+          {micError
+            ? 'Microphone access denied. Please allow microphone access in your browser.'
+            : converseError}
         </p>
       )}
 
@@ -66,12 +78,13 @@ function MicButton({
         </div>
       )}
 
-      {(isPalThinking || palReply) && (
+      {(isPalThinking || isStreaming || palReply) && (
         <div className="pal-reply-box">
           <p>
-            <strong>PAL:</strong> {isPalThinking ? 'PAL is thinking...' : palReply}
+            <strong>PAL:</strong>{' '}
+            {isPalThinking && !palReply ? 'PAL is thinking...' : palReply}
           </p>
-          {isSpeaking && (
+          {(isSpeaking || isStreaming) && (
             <span className="speaking-indicator" aria-label="PAL is speaking">
               <span />
               <span />
