@@ -1,17 +1,36 @@
 import { useState } from 'react'
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000'
 import MicButton from './components/MicButton'
 import useTTS from './hooks/useTTS'
-import heroImg from './assets/hero.png'
+import PalFace from './components/PalFace'
+import { getExpressionFromAppState } from './lib/palExpressions'
 import './App.css'
 
 // Renders the PAL speech coach and coordinates transcription, replies, and speech.
 function App() {
   const [transcript, setTranscript] = useState('')
   const [palReply, setPalReply] = useState('')
+  const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [isPalThinking, setIsPalThinking] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
+  const [overrideExpression, setOverrideExpression] = useState(null)
   const { speak, isSpeaking } = useTTS()
+
+  function detectToneFromReply(replyText) {
+    const lower = replyText.toLowerCase()
+    const pleasedWords = ['good', 'great', 'well done', 'strong', 'excellent', 'nice']
+    const concernedWords = ['watch', 'careful', 'too many', 'filler', 'slow', 'avoid', 'losing']
+
+    if (pleasedWords.some(w => lower.includes(w))) {
+      setOverrideExpression('pleased')
+      setTimeout(() => setOverrideExpression(null), 3000)
+    } else if (concernedWords.some(w => lower.includes(w))) {
+      setOverrideExpression('concerned')
+      setTimeout(() => setOverrideExpression(null), 3000)
+    }
+  }
 
   // Uploads the completed audio recording and asks PAL to respond to the transcript.
   async function handleAudioReady(blob) {
@@ -23,7 +42,7 @@ function App() {
       const formData = new FormData()
       formData.append('file', blob, 'recording.webm')
 
-      const response = await fetch('http://localhost:8000/transcribe', {
+      const response = await fetch(`${BACKEND_URL}/transcribe`, {
         method: 'POST',
         body: formData,
       })
@@ -39,7 +58,7 @@ function App() {
       setIsPalThinking(true)
 
       try {
-        const palResponse = await fetch('http://localhost:8000/respond', {
+        const palResponse = await fetch(`${BACKEND_URL}/respond`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -55,6 +74,7 @@ function App() {
         const reply = palData.reply
         setPalReply(reply)
         setIsPalThinking(false)
+        detectToneFromReply(reply)
 
         if (!isMuted) {
           speak(reply)
@@ -79,7 +99,7 @@ function App() {
   // Clears backend session memory and resets the visible conversation.
   async function handleNewSession() {
     try {
-      await fetch('http://localhost:8000/session/reset', {
+      await fetch(`${BACKEND_URL}/session/reset`, {
         method: 'POST',
       })
     } finally {
@@ -93,17 +113,21 @@ function App() {
     setIsMuted((currentValue) => !currentValue)
   }
 
+  const baseExpression = getExpressionFromAppState(isRecording, isTranscribing, isPalThinking, isSpeaking)
+  const expression = overrideExpression || baseExpression
+
   return (
     <>
       <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
+        <div className="pal-face-wrapper">
+          <PalFace expression={expression} />
         </div>
         <div>
           <h1>PAL</h1>
           <p>Your voice AI speech coach</p>
         </div>
         <MicButton
+          onRecordingChange={setIsRecording}
           onAudioReady={handleAudioReady}
           transcript={transcript}
           palReply={palReply}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import useMicrophone from '../hooks/useMicrophone'
 
 // Renders the microphone controls and sends completed recordings upward.
@@ -11,8 +12,13 @@ function MicButton({
   isMuted,
   onNewSession,
   onMuteToggle,
+  onRecordingChange,
 }) {
   const { startRecording, stopRecording, error, isRecording } = useMicrophone()
+
+  useEffect(() => {
+    if (onRecordingChange) onRecordingChange(isRecording)
+  }, [isRecording, onRecordingChange])
 
   // Toggles recording and forwards the stopped audio Blob to the app.
   async function handleClick() {
