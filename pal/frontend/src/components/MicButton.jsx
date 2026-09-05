@@ -1,76 +1,74 @@
-import { useEffect } from 'react'
-import useMicrophone from '../hooks/useMicrophone'
+// MicButton — Phase 2
+// The push-to-talk button is gone. This component now shows VAD status and
+// exposes a single mute/unmute toggle for the auto-listening system.
 
-// Renders the microphone controls and sends completed recordings upward.
 function MicButton({
-  onAudioReady,
-  transcript,
-  palReply,
-  isTranscribing,
+  isVadReady,
+  isListening,
+  isSpeechDetected,
   isPalThinking,
   isSpeaking,
   isStreaming,
   isMuted,
-  converseError,
+  onToggleMute,
+  transcript,
+  palReply,
+  isTranscribing,
+  vadError,
   onNewSession,
-  onMuteToggle,
-  onRecordingChange,
 }) {
-  const { startRecording, stopRecording, error: micError, isRecording } = useMicrophone()
-
-  useEffect(() => {
-    if (onRecordingChange) onRecordingChange(isRecording)
-  }, [isRecording, onRecordingChange])
-
-  // Toggles recording and forwards the stopped audio Blob to the app.
-  async function handleClick() {
-    if (isRecording) {
-      const blob = await stopRecording()
-      if (blob) onAudioReady(blob)
-      return
-    }
-    await startRecording()
+  // ── Status line shown below the face ──────────────────────────────────────
+  function statusText() {
+    if (!isVadReady)        return 'Starting up…'
+    if (isMuted)            return 'Auto-listen paused'
+    if (isSpeaking)         return 'PAL is speaking…'
+    if (isStreaming)        return 'PAL is responding…'
+    if (isPalThinking)      return 'PAL is thinking…'
+    if (isSpeechDetected)   return 'Listening…'
+    if (isListening)        return 'Waiting for you to speak'
+    return 'Initialising mic…'
   }
 
-  // Button is disabled while PAL is speaking, streaming, or thinking.
-  const isDisabled = isSpeaking || isStreaming || isPalThinking
-
-  function buttonClass() {
-    if (isRecording) return 'mic-button recording'
-    if (isSpeaking) return 'mic-button disabled'
-    if (isStreaming || isPalThinking) return 'mic-button streaming'
+  // ── Mute button appearance ─────────────────────────────────────────────────
+  function muteButtonClass() {
+    if (isMuted)     return 'mic-button muted'
+    if (!isVadReady) return 'mic-button disabled'
     return 'mic-button'
   }
 
-  function buttonLabel() {
-    if (isSpeaking) return 'PAL is speaking...'
-    if (isStreaming) return 'PAL is responding...'
-    if (isPalThinking) return 'PAL is thinking...'
-    if (isRecording) return 'Stop'
-    return 'Start speaking'
+  function muteButtonLabel() {
+    return isMuted ? '🎤 Resume listening' : '🔇 Pause listening'
   }
 
   return (
     <div className="mic-panel">
+
+      {/* VAD status indicator */}
+      <div className="vad-status" aria-live="polite">
+        {isListening && !isMuted && !isSpeaking && !isStreaming && !isPalThinking && (
+          <span className={`vad-dot ${isSpeechDetected ? 'active' : ''}`} aria-hidden="true" />
+        )}
+        <span className="vad-status-text">{statusText()}</span>
+      </div>
+
+      {/* Mute / unmute toggle — the only manual control left */}
       <button
         type="button"
-        className={buttonClass()}
-        onClick={handleClick}
-        disabled={isDisabled}
+        className={muteButtonClass()}
+        onClick={onToggleMute}
+        disabled={!isVadReady}
+        aria-pressed={isMuted}
       >
-        {isRecording && <span className="recording-dot" aria-hidden="true" />}
-        {buttonLabel()}
+        {muteButtonLabel()}
       </button>
 
-      {(micError || converseError) && (
-        <p className="mic-error">
-          {micError
-            ? 'Microphone access denied. Please allow microphone access in your browser.'
-            : converseError}
-        </p>
+      {vadError && (
+        <p className="mic-error" role="alert">{vadError}</p>
       )}
 
-      {isTranscribing && <p className="loading-text">Transcribing...</p>}
+      {isTranscribing && (
+        <p className="loading-text">Transcribing…</p>
+      )}
 
       {transcript && (
         <div className="transcript-box">
@@ -82,21 +80,15 @@ function MicButton({
         <div className="pal-reply-box">
           <p>
             <strong>PAL:</strong>{' '}
-            {isPalThinking && !palReply ? 'PAL is thinking...' : palReply}
+            {isPalThinking && !palReply ? 'PAL is thinking…' : palReply}
           </p>
           {(isSpeaking || isStreaming) && (
             <span className="speaking-indicator" aria-label="PAL is speaking">
-              <span />
-              <span />
-              <span />
+              <span /><span /><span />
             </span>
           )}
         </div>
       )}
-
-      <button type="button" className="session-button" onClick={onMuteToggle}>
-        {isMuted ? 'Unmute PAL' : 'Mute PAL'}
-      </button>
 
       <button type="button" className="session-button" onClick={onNewSession}>
         Start new session
