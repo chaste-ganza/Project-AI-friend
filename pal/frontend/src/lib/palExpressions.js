@@ -7,6 +7,16 @@ export const EXPRESSIONS = {
     showPulseRing: false,
     animateMouth: false,
   },
+  // VAD is active and quiet — PAL is passively waiting for the user to speak.
+  vadIdle: {
+    browAngle: 0,
+    eyeScaleY: 1,
+    mouthCurve: 8,
+    showThoughtBubble: false,
+    showPulseRing: false,
+    animateMouth: false,
+  },
+  // VAD is running and has detected speech — user is currently talking.
   listening: {
     browAngle: -5,
     eyeScaleY: 1.15,
@@ -23,8 +33,7 @@ export const EXPRESSIONS = {
     showPulseRing: false,
     animateMouth: false,
   },
-  // 'streaming' is shown while sentence chunks are arriving but audio hasn't
-  // started yet — a subtle attentive look, distinct from 'thinking'.
+  // Sentence chunks arriving, audio not playing yet.
   streaming: {
     browAngle: 2,
     eyeScaleY: 1.05,
@@ -40,6 +49,15 @@ export const EXPRESSIONS = {
     showThoughtBubble: false,
     showPulseRing: false,
     animateMouth: true,
+  },
+  // Auto-listen is paused by the user.
+  muted: {
+    browAngle: -3,
+    eyeScaleY: 0.95,
+    mouthCurve: 5,
+    showThoughtBubble: false,
+    showPulseRing: false,
+    animateMouth: false,
   },
   concerned: {
     browAngle: -15,
@@ -59,24 +77,34 @@ export const EXPRESSIONS = {
   },
 }
 
-// Priority order (first match wins):
-//   speaking  → PAL is playing audio
-//   thinking  → waiting for first LLM token (isPalThinking)
-//   streaming → LLM tokens arriving, audio not yet playing
-//   thinking  → transcription in progress (reuses same face)
-//   listening → mic is recording
-//   idle      → default
-export function getExpressionFromAppState(
-  isRecording,
+/**
+ * Resolves the current PalFace expression from app state.
+ *
+ * Priority order (first match wins):
+ *   speaking        → PAL audio is playing
+ *   thinking        → waiting for first LLM token
+ *   streaming       → LLM tokens arriving, no audio yet
+ *   thinking        → transcription in progress
+ *   listening       → VAD has detected speech (user is talking)
+ *   muted           → user paused auto-listen
+ *   vadIdle         → VAD active, no speech detected
+ *   idle            → VAD not yet ready
+ */
+export function getExpressionFromAppState({
+  isListening,
+  isSpeechDetected,
   isTranscribing,
   isPalThinking,
   isSpeaking,
   isStreaming,
-) {
-  if (isSpeaking) return 'speaking'
-  if (isPalThinking) return 'thinking'
-  if (isStreaming) return 'streaming'
-  if (isTranscribing) return 'thinking'
-  if (isRecording) return 'listening'
+  isMuted,
+}) {
+  if (isSpeaking)       return 'speaking'
+  if (isPalThinking)    return 'thinking'
+  if (isStreaming)      return 'streaming'
+  if (isTranscribing)   return 'thinking'
+  if (isSpeechDetected) return 'listening'
+  if (isMuted)          return 'muted'
+  if (isListening)      return 'vadIdle'
   return 'idle'
 }

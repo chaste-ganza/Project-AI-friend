@@ -1,36 +1,36 @@
 import { useEffect, useRef, useState } from 'react'
 import MicButton from './components/MicButton'
 import PalFace from './components/PalFace'
-import useConverse from './hooks/useConverse'
+import useVAD from './hooks/useVAD'
 import { getExpressionFromAppState } from './lib/palExpressions'
 import './App.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000'
 
-// Renders the PAL speech coach and coordinates transcription, streaming reply, and speech.
 function App() {
-  const [transcript, setTranscript] = useState('')
-  const [isRecording, setIsRecording] = useState(false)
+  const [transcript, setTranscript]   = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
   const [overrideExpression, setOverrideExpression] = useState(null)
   const overrideTimerRef = useRef(null)
 
   const {
-    converse,
-    cancelConverse,
+    isVadReady,
+    isListening,
+    isSpeechDetected,
+    isMuted,
+    toggleMute,
     palReply,
     isPalThinking,
     isStreaming,
     isSpeaking,
-    error: converseError,
+    vadError,
     onExpression,
-  } = useConverse()
+  } = useVAD()
 
   // Wire up expression events from the WebSocket stream.
   useEffect(() => {
     onExpression.current = (expr) => {
-      if (expr === 'idle') return          // don't override with neutral
+      if (expr === 'idle') return
       clearTimeout(overrideTimerRef.current)
       setOverrideExpression(expr)
       overrideTimerRef.current = setTimeout(() => setOverrideExpression(null), 3000)
@@ -41,52 +41,25 @@ function App() {
     }
   }, [onExpression])
 
-  // Uploads the completed audio recording, transcribes it, then starts the WS stream.
-  async function handleAudioReady(blob) {
-    setIsTranscribing(true)
-    setTranscript('')
-
-    try {
-      const formData = new FormData()
-      formData.append('file', blob, 'recording.webm')
-
-      const response = await fetch(`${BACKEND_URL}/transcribe`, {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Transcription request failed')
-
-      const data = await response.json()
-      const transcriptText = data.transcript
-      setTranscript(transcriptText)
-      setIsTranscribing(false)
-
-      // Hand off to the streaming WebSocket pipeline.
-      await converse(transcriptText, isMuted)
-    } catch {
-      setTranscript('Sorry, PAL could not transcribe that audio.')
-      setIsTranscribing(false)
-    }
-  }
-
-  // Clears backend session memory, cancels any in-flight stream, and resets UI.
+  // Clears backend session memory and resets UI state.
   async function handleNewSession() {
-    cancelConverse()
+    setTranscript('')
     try {
       await fetch(`${BACKEND_URL}/session/reset`, { method: 'POST' })
-    } finally {
-      setTranscript('')
+    } catch {
+      // Non-fatal — local state is already cleared.
     }
   }
 
-  function handleMuteToggle() {
-    setIsMuted(v => !v)
-  }
-
-  const baseExpression = getExpressionFromAppState(
-    isRecording, isTranscribing, isPalThinking, isSpeaking, isStreaming,
-  )
+  const baseExpression = getExpressionFromAppState({
+    isListening,
+    isSpeechDetected,
+    isTranscribing,
+    isPalThinking,
+    isSpeaking,
+    isStreaming,
+    isMuted,
+  })
   const expression = overrideExpression ?? baseExpression
 
   return (
@@ -100,18 +73,19 @@ function App() {
           <p>Your voice AI speech coach</p>
         </div>
         <MicButton
-          onRecordingChange={setIsRecording}
-          onAudioReady={handleAudioReady}
-          transcript={transcript}
-          palReply={palReply}
-          isTranscribing={isTranscribing}
+          isVadReady={isVadReady}
+          isListening={isListening}
+          isSpeechDetected={isSpeechDetected}
           isPalThinking={isPalThinking}
           isSpeaking={isSpeaking}
           isStreaming={isStreaming}
           isMuted={isMuted}
-          converseError={converseError}
+          onToggleMute={toggleMute}
+          transcript={transcript}
+          palReply={palReply}
+          isTranscribing={isTranscribing}
+          vadError={vadError}
           onNewSession={handleNewSession}
-          onMuteToggle={handleMuteToggle}
         />
       </section>
     </>
