@@ -139,6 +139,52 @@
   animation-delay: 0.3s;
 }
 
+/* ── VAD status indicator ─────────────────────────────────────────────────── */
+.vad-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.vad-status-text {
+  font-size: 14px;
+  color: var(--text-h);
+  opacity: 0.75;
+}
+
+/* Breathing dot: grey when waiting, green pulse when speech is detected */
+.vad-dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6b7280;
+  transition: background 0.2s;
+}
+
+.vad-dot.active {
+  background: #22c55e;
+  animation: vad-speech-pulse 0.7s infinite ease-in-out;
+}
+
+@keyframes vad-speech-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1);   }
+  50%       { opacity: 0.5; transform: scale(1.35); }
+}
+
+/* ── Muted button state ───────────────────────────────────────────────────── */
+.mic-button.muted {
+  color: #9ca3af;
+  background: rgba(156, 163, 175, 0.1);
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+.mic-button.muted:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
 .session-button {
   min-height: 38px;
   padding: 8px 14px;
